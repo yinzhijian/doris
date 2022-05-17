@@ -36,29 +36,25 @@ namespace doris {
 
 // Broker
 
-ParquetReaderWrap::ParquetReaderWrap(FileReader* file_reader, int32_t num_of_columns_from_file)
-        : _num_of_columns_from_file(num_of_columns_from_file),
+ParquetReaderWrap::ParquetReaderWrap(FileReader* file_reader, int64_t batch_size, int32_t num_of_columns_from_file)
+        :  ArrowReaderWrap(file_reader, batch_size, num_of_columns_from_file),
           _total_groups(0),
           _current_group(0),
           _rows_of_group(0),
           _current_line_of_group(0),
           _current_line_of_batch(0) {
-    _parquet = std::shared_ptr<ParquetFile>(new ParquetFile(file_reader));
     _properties = parquet::ReaderProperties();
     _properties.enable_buffered_stream();
     _properties.set_buffer_size(65535);
 }
 
-ParquetReaderWrap::~ParquetReaderWrap() {
-    close();
-}
-Status ParquetReaderWrap::init_parquet_reader(const std::vector<SlotDescriptor*>& tuple_slot_descs,
+Status ParquetReaderWrap::init_reader(const std::vector<SlotDescriptor*>& tuple_slot_descs,
                                               const std::string& timezone) {
     try {
         // new file reader for parquet file
         auto st = parquet::arrow::FileReader::Make(
                 arrow::default_memory_pool(),
-                parquet::ParquetFileReader::Open(_parquet, _properties), &_reader);
+                parquet::ParquetFileReader::Open(_arrow_file, _properties), &_reader);
         if (!st.ok()) {
             LOG(WARNING) << "failed to create parquet file reader, errmsg=" << st.ToString();
             return Status::InternalError("Failed to create file reader");
@@ -120,15 +116,8 @@ Status ParquetReaderWrap::init_parquet_reader(const std::vector<SlotDescriptor*>
     }
 }
 
-void ParquetReaderWrap::close() {
-    arrow::Status st = _parquet->Close();
-    if (!st.ok()) {
-        LOG(WARNING) << "close parquet file error: " << st.ToString();
-    }
-}
-
 Status ParquetReaderWrap::size(int64_t* size) {
-    arrow::Result<int64_t> result = _parquet->GetSize();
+    arrow::Result<int64_t> result = _arrow_file->GetSize();
     if (result.ok()) {
         *size = result.ValueOrDie();
         return Status::OK();
@@ -551,85 +540,6 @@ Status ParquetReaderWrap::read(Tuple* tuple, const std::vector<SlotDescriptor*>&
     ++_current_line_of_group;
     ++_current_line_of_batch;
     return read_record_batch(tuple_slot_descs, eof);
-}
-
-ParquetFile::ParquetFile(FileReader* file) : _file(file) {}
-
-ParquetFile::~ParquetFile() {
-    arrow::Status st = Close();
-    if (!st.ok()) {
-        LOG(WARNING) << "close parquet file error: " << st.ToString();
-    }
-}
-
-arrow::Status ParquetFile::Close() {
-    if (_file != nullptr) {
-        _file->close();
-        delete _file;
-        _file = nullptr;
-    }
-    return arrow::Status::OK();
-}
-
-bool ParquetFile::closed() const {
-    if (_file != nullptr) {
-        return _file->closed();
-    } else {
-        return true;
-    }
-}
-
-arrow::Result<int64_t> ParquetFile::Read(int64_t nbytes, void* buffer) {
-    return ReadAt(_pos, nbytes, buffer);
-}
-
-arrow::Result<int64_t> ParquetFile::ReadAt(int64_t position, int64_t nbytes, void* out) {
-    int64_t reads = 0;
-    int64_t bytes_read = 0;
-    _pos = position;
-    while (nbytes > 0) {
-        Status result = _file->readat(_pos, nbytes, &reads, out);
-        if (!result.ok()) {
-            bytes_read = 0;
-            return arrow::Status::IOError("Readat failed.");
-        }
-        if (reads == 0) {
-            break;
-        }
-        bytes_read += reads; // total read bytes
-        nbytes -= reads;     // remained bytes
-        _pos += reads;
-        out = (char*)out + reads;
-    }
-    return bytes_read;
-}
-
-arrow::Result<int64_t> ParquetFile::GetSize() {
-    return _file->size();
-}
-
-arrow::Status ParquetFile::Seek(int64_t position) {
-    _pos = position;
-    // NOTE: Only readat operation is used, so _file seek is not called here.
-    return arrow::Status::OK();
-}
-
-arrow::Result<int64_t> ParquetFile::Tell() const {
-    return _pos;
-}
-
-arrow::Result<std::shared_ptr<arrow::Buffer>> ParquetFile::Read(int64_t nbytes) {
-    auto buffer = arrow::AllocateBuffer(nbytes, arrow::default_memory_pool());
-    ARROW_RETURN_NOT_OK(buffer);
-    std::shared_ptr<arrow::Buffer> read_buf = std::move(buffer.ValueOrDie());
-    auto bytes_read = ReadAt(_pos, nbytes, read_buf->mutable_data());
-    ARROW_RETURN_NOT_OK(bytes_read);
-    // If bytes_read is equal with read_buf's capacity, we just assign
-    if (bytes_read.ValueOrDie() == nbytes) {
-        return std::move(read_buf);
-    } else {
-        return arrow::SliceBuffer(read_buf, 0, bytes_read.ValueOrDie());
-    }
 }
 
 } // namespace doris
