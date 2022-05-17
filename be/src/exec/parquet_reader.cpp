@@ -36,8 +36,9 @@ namespace doris {
 
 // Broker
 
-ParquetReaderWrap::ParquetReaderWrap(FileReader* file_reader, int64_t batch_size, int32_t num_of_columns_from_file)
-        :  ArrowReaderWrap(file_reader, batch_size, num_of_columns_from_file),
+ParquetReaderWrap::ParquetReaderWrap(FileReader* file_reader, int64_t batch_size,
+                                     int32_t num_of_columns_from_file)
+        : ArrowReaderWrap(file_reader, batch_size, num_of_columns_from_file),
           _total_groups(0),
           _current_group(0),
           _rows_of_group(0),
@@ -49,7 +50,7 @@ ParquetReaderWrap::ParquetReaderWrap(FileReader* file_reader, int64_t batch_size
 }
 
 Status ParquetReaderWrap::init_reader(const std::vector<SlotDescriptor*>& tuple_slot_descs,
-                                              const std::string& timezone) {
+                                      const std::string& timezone) {
     try {
         // new file reader for parquet file
         auto st = parquet::arrow::FileReader::Make(
