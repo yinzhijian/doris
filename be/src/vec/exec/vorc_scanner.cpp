@@ -21,16 +21,17 @@
 namespace doris::vectorized {
 
 VORCScanner::VORCScanner(RuntimeState* state, RuntimeProfile* profile,
-                                 const TBrokerScanRangeParams& params,
-                                 const std::vector<TBrokerRangeDesc>& ranges,
-                                 const std::vector<TNetworkAddress>& broker_addresses,
-                                 const std::vector<TExpr>& pre_filter_texprs,
-                                 ScannerCounter* counter)
-        : VArrowScanner(state, profile, params, ranges, broker_addresses, pre_filter_texprs, counter) {}
+                         const TBrokerScanRangeParams& params,
+                         const std::vector<TBrokerRangeDesc>& ranges,
+                         const std::vector<TNetworkAddress>& broker_addresses,
+                         const std::vector<TExpr>& pre_filter_texprs, ScannerCounter* counter)
+        : VArrowScanner(state, profile, params, ranges, broker_addresses, pre_filter_texprs,
+                        counter) {}
 
 VORCScanner::~VORCScanner() {}
 
-ArrowReaderWrap* VORCScanner::_new_arrow_reader(FileReader* file_reader, int64_t batch_size, int32_t num_of_columns_from_file) {
+ArrowReaderWrap* VORCScanner::_new_arrow_reader(FileReader* file_reader, int64_t batch_size,
+                                                int32_t num_of_columns_from_file) {
     return new VORCReaderWrap(file_reader, batch_size, num_of_columns_from_file);
 }
 

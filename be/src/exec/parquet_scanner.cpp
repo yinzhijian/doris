@@ -154,7 +154,8 @@ Status ParquetScanner::open_next_reader() {
         if (range.__isset.num_of_columns_from_file) {
             num_of_columns_from_file = range.num_of_columns_from_file;
         }
-        _cur_file_reader = new ParquetReaderWrap(file_reader.release(), _state->batch_size(), num_of_columns_from_file);
+        _cur_file_reader = new ParquetReaderWrap(file_reader.release(), _state->batch_size(),
+                                                 num_of_columns_from_file);
 
         Status status = _cur_file_reader->init_reader(_src_slot_descs, _state->timezone());
 

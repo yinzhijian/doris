@@ -76,16 +76,14 @@ public:
                                const std::string& timezone) = 0;
     // for row
     virtual Status read(Tuple* tuple, const std::vector<SlotDescriptor*>& tuple_slot_descs,
-                MemPool* mem_pool, bool* eof) {
+                        MemPool* mem_pool, bool* eof) {
         return Status::NotSupported("Not Implemented read");
     }
     // for vec
     virtual Status next_batch(std::shared_ptr<arrow::RecordBatch>* batch,
-                      const std::vector<SlotDescriptor*>& tuple_slot_descs, bool* eof) = 0;
+                              const std::vector<SlotDescriptor*>& tuple_slot_descs, bool* eof) = 0;
     virtual void close();
-    virtual Status size(int64_t* size) {
-        return Status::NotSupported("Not Implemented size");
-    }
+    virtual Status size(int64_t* size) { return Status::NotSupported("Not Implemented size"); }
 
 protected:
     const int64_t _batch_size;

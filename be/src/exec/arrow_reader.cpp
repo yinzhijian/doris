@@ -36,9 +36,9 @@ namespace doris {
 
 // Broker
 
-ArrowReaderWrap::ArrowReaderWrap(FileReader* file_reader, int64_t batch_size, int32_t num_of_columns_from_file)
-        : _batch_size(batch_size),
-        _num_of_columns_from_file(num_of_columns_from_file) {
+ArrowReaderWrap::ArrowReaderWrap(FileReader* file_reader, int64_t batch_size,
+                                 int32_t num_of_columns_from_file)
+        : _batch_size(batch_size), _num_of_columns_from_file(num_of_columns_from_file) {
     _arrow_file = std::shared_ptr<ArrowFile>(new ArrowFile(file_reader));
 }
 

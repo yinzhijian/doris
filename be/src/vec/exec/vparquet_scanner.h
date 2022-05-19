@@ -45,8 +45,10 @@ public:
                     const std::vector<TExpr>& pre_filter_texprs, ScannerCounter* counter);
 
     virtual ~VParquetScanner();
+
 protected:
-    ArrowReaderWrap* _new_arrow_reader(FileReader* file_reader, int64_t batch_size, int32_t num_of_columns_from_file) override;
+    ArrowReaderWrap* _new_arrow_reader(FileReader* file_reader, int64_t batch_size,
+                                       int32_t num_of_columns_from_file) override;
 };
 
 } // namespace doris::vectorized

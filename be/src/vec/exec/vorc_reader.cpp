@@ -27,7 +27,8 @@
 
 namespace doris::vectorized {
 
-VORCReaderWrap::VORCReaderWrap(FileReader* file_reader, int64_t batch_size, int32_t num_of_columns_from_file)
+VORCReaderWrap::VORCReaderWrap(FileReader* file_reader, int64_t batch_size,
+                               int32_t num_of_columns_from_file)
         : ArrowReaderWrap(file_reader, batch_size, num_of_columns_from_file) {
     _rb_reader = nullptr;
     _reader = nullptr;
@@ -41,7 +42,8 @@ VORCReaderWrap::~VORCReaderWrap() {}
 Status VORCReaderWrap::init_reader(const std::vector<SlotDescriptor*>& tuple_slot_descs,
                                    const std::string& timezone) {
     // Open ORC file reader
-    auto maybe_reader = arrow::adapters::orc::ORCFileReader::Open(_arrow_file, arrow::default_memory_pool());
+    auto maybe_reader =
+            arrow::adapters::orc::ORCFileReader::Open(_arrow_file, arrow::default_memory_pool());
     if (!maybe_reader.ok()) {
         // Handle error instantiating file reader...
         LOG(WARNING) << "failed to create orc file reader, errmsg=" << maybe_reader.status();
@@ -81,18 +83,18 @@ Status VORCReaderWrap::_next_stripe_reader(bool* eof) {
         return Status::OK();
     }
     // Get a stripe level record batch iterator.
-    // record batch will have up to batch_size rows. 
+    // record batch will have up to batch_size rows.
     // NextStripeReader serves as a fine grained alternative to ReadStripe
     // which may cause OOM issues by loading the whole stripe into memory.
     // Note this will only read rows for the current stripe, not the entire file.
-    arrow::Result<std::shared_ptr<arrow::RecordBatchReader>> maybe_rb_reader = _reader->NextStripeReader(_batch_size,
-                                                            _orc_column_ids);
+    arrow::Result<std::shared_ptr<arrow::RecordBatchReader>> maybe_rb_reader =
+            _reader->NextStripeReader(_batch_size, _orc_column_ids);
     if (!maybe_rb_reader.ok()) {
         LOG(WARNING) << "Get RecordBatch Failed. " << maybe_rb_reader.status();
         return Status::InternalError(maybe_rb_reader.status().ToString());
     }
-    _rb_reader =  maybe_rb_reader.ValueOrDie();
-    _current_stripe ++;
+    _rb_reader = maybe_rb_reader.ValueOrDie();
+    _current_stripe++;
     return Status::OK();
 }
 
@@ -115,10 +117,9 @@ Status VORCReaderWrap::_column_indices(const std::vector<SlotDescriptor*>& tuple
 }
 
 Status VORCReaderWrap::next_batch(std::shared_ptr<arrow::RecordBatch>* batch,
-                                     const std::vector<SlotDescriptor*>& tuple_slot_descs,
-                                     bool* eof) {
+                                  const std::vector<SlotDescriptor*>& tuple_slot_descs, bool* eof) {
     *eof = false;
-    do {                                     
+    do {
         auto st = _rb_reader->ReadNext(batch);
         LOG(INFO) << st;
         if (!st.ok()) {

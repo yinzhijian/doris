@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include <arrow/api.h>
 #include <arrow/adapters/orc/adapter.h>
+#include <arrow/api.h>
 #include <arrow/buffer.h>
 
 #include <stdint.h>
@@ -29,15 +29,15 @@
 namespace doris::vectorized {
 
 // Reader of orc file
-class VORCReaderWrap : public ArrowReaderWrap{
+class VORCReaderWrap : public ArrowReaderWrap {
 public:
     VORCReaderWrap(FileReader* file_reader, int64_t batch_size, int32_t num_of_columns_from_file);
     virtual ~VORCReaderWrap();
 
     Status init_reader(const std::vector<SlotDescriptor*>& tuple_slot_descs,
-                const std::string& timezone) override;
-    Status next_batch(std::shared_ptr<arrow::RecordBatch>* batch, const std::vector<SlotDescriptor*>& tuple_slot_descs,
-                bool* eof) override;
+                       const std::string& timezone) override;
+    Status next_batch(std::shared_ptr<arrow::RecordBatch>* batch,
+                      const std::vector<SlotDescriptor*>& tuple_slot_descs, bool* eof) override;
 
 private:
     Status _column_indices(const std::vector<SlotDescriptor*>& tuple_slot_descs);

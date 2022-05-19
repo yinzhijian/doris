@@ -34,11 +34,10 @@
 namespace doris::vectorized {
 
 VArrowScanner::VArrowScanner(RuntimeState* state, RuntimeProfile* profile,
-                                 const TBrokerScanRangeParams& params,
-                                 const std::vector<TBrokerRangeDesc>& ranges,
-                                 const std::vector<TNetworkAddress>& broker_addresses,
-                                 const std::vector<TExpr>& pre_filter_texprs,
-                                 ScannerCounter* counter)
+                             const TBrokerScanRangeParams& params,
+                             const std::vector<TBrokerRangeDesc>& ranges,
+                             const std::vector<TNetworkAddress>& broker_addresses,
+                             const std::vector<TExpr>& pre_filter_texprs, ScannerCounter* counter)
         : BaseScanner(state, profile, params, pre_filter_texprs, counter),
           _ranges(ranges),
           _broker_addresses(broker_addresses),
@@ -113,7 +112,8 @@ Status VArrowScanner::_open_next_reader() {
         if (range.__isset.num_of_columns_from_file) {
             num_of_columns_from_file = range.num_of_columns_from_file;
         }
-        _cur_file_reader = _new_arrow_reader(file_reader.release(), _state->batch_size(), num_of_columns_from_file);
+        _cur_file_reader = _new_arrow_reader(file_reader.release(), _state->batch_size(),
+                                             num_of_columns_from_file);
 
         Status status = _cur_file_reader->init_reader(_src_slot_descs, _state->timezone());
 
