@@ -1,0 +1,3 @@
+/home/disk4/yintao03/baidu/bdg/doris/core/parquet/CMakeFiles/rebuild_cache.dir
+/home/disk4/yintao03/baidu/bdg/doris/core/parquet/CMakeFiles/edit_cache.dir
+/home/disk4/yintao03/baidu/bdg/doris/core/parquet/CMakeFiles/main.dir

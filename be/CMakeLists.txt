@@ -903,6 +903,7 @@ add_subdirectory(${SRC_DIR}/runtime)
 add_subdirectory(${SRC_DIR}/service)
 add_subdirectory(${SRC_DIR}/udf)
 
+add_subdirectory(${SRC_DIR}/parquet)
 if (BUILD_META_TOOL AND BUILD_META_TOOL STREQUAL "ON")
     add_subdirectory(${SRC_DIR}/tools)
 endif()

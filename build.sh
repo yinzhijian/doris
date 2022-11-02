@@ -145,7 +145,7 @@ if [[ "$#" == 1 ]]; then
     BUILD_AUDIT=1
     BUILD_META_TOOL='OFF'
     BUILD_SPARK_DPP=1
-    BUILD_JAVA_UDF=1
+    BUILD_JAVA_UDF=0
     BUILD_HIVE_UDF=1
     CLEAN=0
 else
@@ -154,13 +154,13 @@ else
         --fe)
             BUILD_FE=1
             BUILD_SPARK_DPP=1
-            BUILD_JAVA_UDF=1
+            BUILD_JAVA_UDF=0
             BUILD_HIVE_UDF=1
             shift
             ;;
         --be)
             BUILD_BE=1
-            BUILD_JAVA_UDF=1
+            BUILD_JAVA_UDF=0
             shift
             ;;
         --broker)
@@ -180,7 +180,7 @@ else
             shift
             ;;
         --java-udf)
-            BUILD_JAVA_UDF=1
+            BUILD_JAVA_UDF=0
             BUILD_FE=1
             BUILD_SPARK_DPP=1
             shift
